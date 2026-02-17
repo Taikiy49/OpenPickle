@@ -5,7 +5,7 @@ import { pushToast } from "../components/ToastHost";
 
 export default function Games() {
   const [name, setName] = useState("You");
-  const [refresh, setRefresh] = useState(0);
+  const [setRefresh] = useState(0);
 
   const games = useMemo(() => loadGames(), []);
   const courts = useMemo(() => loadCourts(), []);

@@ -3,7 +3,7 @@ import { loadEvents, addEvent, deleteEvent } from "../store/eventsStore";
 import { pushToast } from "../components/ToastHost";
 
 export default function Events() {
-  const [refresh, setRefresh] = useState(0);
+  const [setRefresh] = useState(0);
   const events = useMemo(() => loadEvents(), []);
 
   const [title, setTitle] = useState("Community Round Robin");
