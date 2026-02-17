@@ -1,5 +1,6 @@
+// src/components/CourtDrawer.jsx
 import { useMemo, useState } from "react";
-import { X, MapPin, ExternalLink, Bell, Plus, Users} from "lucide-react";
+import { X, MapPin, ExternalLink, Bell, Plus, Users } from "lucide-react";
 import Pill from "./Pill";
 import Modal from "./Modal";
 import { pushToast } from "./ToastHost";
@@ -22,12 +23,27 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
   const [gMax, setGMax] = useState(8);
   const [gHost, setGHost] = useState("You");
 
-  const fav = useMemo(() => (court ? loadFavorites().has(court.id) : false), [court, crowdOpen, gameOpen]);
-  const crowd = useMemo(() => (court ? getCourtCrowdSummary(court.id) : { recent: [], avgPlayers: 0 }), [court, crowdOpen]);
+  // ✅ Only depends on the court id (not modal open state)
+  const fav = useMemo(() => {
+    if (!court?.id) return false;
+    return loadFavorites().has(court.id);
+  }, [court?.id]);
+
+  // ✅ Only depends on the court id; crowd updates when the component re-renders
+  // (and we force re-render by closing modal + resetting note/players etc.)
+  const crowd = useMemo(() => {
+    if (!court?.id) return { recent: [], avgPlayers: 0 };
+    return getCourtCrowdSummary(court.id);
+  }, [court?.id]);
 
   if (!open || !court) return null;
 
-  const statusTone = computed?.isOpenNow ? "good" : computed?.nextStart ? "cool" : "neutral";
+  const statusTone = computed?.isOpenNow
+    ? "good"
+    : computed?.nextStartLabel
+    ? "cool"
+    : "neutral";
+
   const statusText = computed?.isOpenNow
     ? "Open play happening now"
     : computed?.nextStartLabel
@@ -42,7 +58,15 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
           <div className="row" style={{ alignItems: "flex-start" }}>
             <div style={{ flex: "1 1 auto" }}>
               <div className="h1">{court.name}</div>
-              <div className="p" style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+              <div
+                className="p"
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "center",
+                  marginTop: 6,
+                }}
+              >
                 <MapPin size={14} /> {court.address}
               </div>
               <div style={{ marginTop: 10 }}>
@@ -68,14 +92,21 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
 
             <button
               className="btn btn-small"
-              onClick={() => pushToast({ title: "Mock alert set 🔔", msg: "Real push later (Firebase / OneSignal)." })}
+              onClick={() =>
+                pushToast({
+                  title: "Mock alert set 🔔",
+                  msg: "Real push later (Firebase / OneSignal).",
+                })
+              }
             >
               <Bell size={16} /> Notify
             </button>
 
             <a
               className="btn btn-small"
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                court.address
+              )}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -101,7 +132,9 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
               {(court.openPlay || []).map((s, idx) => (
                 <div key={idx} className="row" style={{ justifyContent: "space-between" }}>
                   <div style={{ fontWeight: 900 }}>{s.day}</div>
-                  <div className="p">{s.start}–{s.end}</div>
+                  <div className="p">
+                    {s.start}–{s.end}
+                  </div>
                   <div className="p">{s.level}</div>
                 </div>
               ))}
@@ -113,11 +146,20 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
 
           <div className="card" style={{ padding: 14 }}>
             <div style={{ fontWeight: 1000 }}>Crowd (recent)</div>
-            <div className="p" style={{ marginTop: 6 }}>Avg from last 5 reports: <b>{crowd.avgPlayers}</b> players</div>
+            <div className="p" style={{ marginTop: 6 }}>
+              Avg from last 5 reports: <b>{crowd.avgPlayers}</b> players
+            </div>
 
             <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-              {crowd.recent.map(r => (
-                <div key={r.id} style={{ border: "1px solid rgba(226,232,240,0.7)", borderRadius: 16, padding: 10 }}>
+              {crowd.recent.map((r) => (
+                <div
+                  key={r.id}
+                  style={{
+                    border: "1px solid rgba(226,232,240,0.7)",
+                    borderRadius: 16,
+                    padding: 10,
+                  }}
+                >
                   <div className="row">
                     <Pill tone="good">{r.players} players</Pill>
                     <Pill tone="cool">{r.condition}</Pill>
@@ -136,20 +178,32 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
         <div className="row">
           <div style={{ flex: "1 1 160px" }}>
             <div className="p">Players here now</div>
-            <input className="input" type="number" value={players} onChange={(e)=>setPlayers(e.target.value)} />
+            <input
+              className="input"
+              type="number"
+              value={players}
+              onChange={(e) => setPlayers(e.target.value)}
+            />
           </div>
 
           <div style={{ flex: "1 1 160px" }}>
             <div className="p">Court condition</div>
-            <select className="input" value={condition} onChange={(e)=>setCondition(e.target.value)}>
-              {["Good","Windy","Wet","Cracked surface","Nets missing","Packed"].map(x => <option key={x} value={x}>{x}</option>)}
+            <select className="input" value={condition} onChange={(e) => setCondition(e.target.value)}>
+              {["Good", "Windy", "Wet", "Cracked surface", "Nets missing", "Packed"].map((x) => (
+                <option key={x} value={x}>{x}</option>
+              ))}
             </select>
           </div>
         </div>
 
         <div style={{ marginTop: 10 }}>
           <div className="p">Note</div>
-          <input className="input" value={note} onChange={(e)=>setNote(e.target.value)} placeholder="e.g., 2 paddles waiting, good vibes" />
+          <input
+            className="input"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="e.g., 2 paddles waiting, good vibes"
+          />
         </div>
 
         <div className="row" style={{ marginTop: 12, justifyContent: "flex-end" }}>
@@ -158,7 +212,7 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
             className="btn btn-primary"
             onClick={() => {
               addCrowdReport({ courtId: court.id, players, note, condition });
-              pushToast({ title: "Crowd report posted ✅", msg: `Thanks! Avg updates instantly.` });
+              pushToast({ title: "Crowd report posted ✅", msg: "Thanks! Avg updates instantly." });
               setNote("");
               setCrowdOpen(false);
             }}
@@ -172,12 +226,14 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
         <div className="row">
           <div style={{ flex: "1 1 260px" }}>
             <div className="p">Title</div>
-            <input className="input" value={gTitle} onChange={(e)=>setGTitle(e.target.value)} />
+            <input className="input" value={gTitle} onChange={(e) => setGTitle(e.target.value)} />
           </div>
           <div style={{ flex: "1 1 220px" }}>
             <div className="p">Skill</div>
-            <select className="input" value={gSkill} onChange={(e)=>setGSkill(e.target.value)}>
-              {["All","Beginner","Intermediate","Advanced"].map(x => <option key={x} value={x}>{x}</option>)}
+            <select className="input" value={gSkill} onChange={(e) => setGSkill(e.target.value)}>
+              {["All", "Beginner", "Intermediate", "Advanced"].map((x) => (
+                <option key={x} value={x}>{x}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -185,17 +241,22 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
         <div className="row" style={{ marginTop: 10 }}>
           <div style={{ flex: "1 1 260px" }}>
             <div className="p">When</div>
-            <input className="input" value={gWhen} onChange={(e)=>setGWhen(e.target.value)} />
+            <input className="input" value={gWhen} onChange={(e) => setGWhen(e.target.value)} />
           </div>
           <div style={{ flex: "1 1 160px" }}>
             <div className="p">Max players</div>
-            <input className="input" type="number" value={gMax} onChange={(e)=>setGMax(e.target.value)} />
+            <input
+              className="input"
+              type="number"
+              value={gMax}
+              onChange={(e) => setGMax(e.target.value)}
+            />
           </div>
         </div>
 
         <div style={{ marginTop: 10 }}>
           <div className="p">Your name (host)</div>
-          <input className="input" value={gHost} onChange={(e)=>setGHost(e.target.value)} />
+          <input className="input" value={gHost} onChange={(e) => setGHost(e.target.value)} />
         </div>
 
         <div className="row" style={{ marginTop: 12, justifyContent: "flex-end" }}>
@@ -203,7 +264,14 @@ export default function CourtDrawer({ open, court, computed, onClose }) {
           <button
             className="btn btn-primary"
             onClick={() => {
-              createGame({ courtId: court.id, title: gTitle, skill: gSkill, whenLabel: gWhen, maxPlayers: gMax, host: gHost });
+              createGame({
+                courtId: court.id,
+                title: gTitle,
+                skill: gSkill,
+                whenLabel: gWhen,
+                maxPlayers: gMax,
+                host: gHost,
+              });
               pushToast({ title: "Game created 🎾", msg: "Go to Games tab to manage it." });
               setGameOpen(false);
             }}
