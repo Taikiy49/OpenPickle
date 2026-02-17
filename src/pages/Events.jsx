@@ -4,7 +4,7 @@ import { pushToast } from "../components/ToastHost";
 
 export default function Events() {
   const [refresh, setRefresh] = useState(0);
-  const events = useMemo(() => loadEvents(), [refresh]);
+  const events = useMemo(() => loadEvents(), []);
 
   const [title, setTitle] = useState("Community Round Robin");
   const [island, setIsland] = useState("Oʻahu");

@@ -7,7 +7,7 @@ export default function Games() {
   const [name, setName] = useState("You");
   const [refresh, setRefresh] = useState(0);
 
-  const games = useMemo(() => loadGames(), [refresh]);
+  const games = useMemo(() => loadGames(), []);
   const courts = useMemo(() => loadCourts(), []);
 
   const courtName = (id) => courts.find(c => c.id === id)?.name || "Unknown court";

@@ -1,6 +1,6 @@
 {
-  "short_name": "PicklePlay",
-  "name": "Hawaii Pickle Play",
+  "short_name": "PickleLoha",
+  "name": "PickleLoha – Hawaiʻi Open Play Finder",
   "icons": [
     { "src": "logo192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "logo512.png", "sizes": "512x512", "type": "image/png" }

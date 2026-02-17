@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { X, MapPin, ExternalLink, Bell, Plus, Users, Trash2 } from "lucide-react";
+import { X, MapPin, ExternalLink, Bell, Plus, Users} from "lucide-react";
 import Pill from "./Pill";
 import Modal from "./Modal";
 import { pushToast } from "./ToastHost";

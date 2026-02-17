@@ -5,7 +5,7 @@ import { pushToast } from "../components/ToastHost";
 
 export default function Admin() {
   const [refresh, setRefresh] = useState(0);
-  const courts = useMemo(() => loadCourts(), [refresh]);
+  const courts = useMemo(() => loadCourts(), []);
 
   const [editingId, setEditingId] = useState(courts[0]?.id || null);
 
